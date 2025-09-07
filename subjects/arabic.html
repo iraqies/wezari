@@ -1,1 +1,306 @@
 
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اللغة العربية - أرشيف أوراق الامتحانات</title>
+    <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>أرشيف أوراق امتحانات اللغة العربية</h1>
+            <p>اختر السنة لعرض أوراق الامتحانات والإجابات الرسمية</p>
+            <a href="../index.html" class="back-link">← العودة إلى الصفحة الرئيسية</a>
+        </header>
+
+        <div class="year-filter">
+            <h2>اختر السنة:</h2>
+            <div class="year-buttons" id="year-buttons">
+                <!-- Years will be populated by JavaScript -->
+            </div>
+        </div>
+
+        <div id="exam-container" class="subjects-grid">
+            <!-- Exam papers will be populated by JavaScript -->
+        </div>
+
+        <div id="no-data" class="no-data" style="display: none;">
+            <h2>لا توجد بيانات متاحة لهذه السنة</h2>
+            <p>لم يتم إضافة أوراق امتحانات للغة العربية لهذه السنة بعد.</p>
+        </div>
+        
+        <footer>
+            <p>أرشيف أوراق الامتحانات الدولية - جميع الحقوق محفوظة © 2023</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load exam data from JSON file
+            fetch('../exam_papers.json')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const arabicData = data.arabic;
+                    if (!arabicData || Object.keys(arabicData).length === 0) {
+                        document.getElementById('no-data').style.display = 'block';
+                        return;
+                    }
+
+                    // Get all available years
+                    const years = Object.keys(arabicData).sort((a, b) => b - a);
+                    
+                    // Create year buttons
+                    const yearButtonsContainer = document.getElementById('year-buttons');
+                    years.forEach(year => {
+                        const button = document.createElement('button');
+                        button.className = 'year-btn';
+                        button.textContent = year;
+                        button.addEventListener('click', () => showExamsForYear(arabicData, year));
+                        yearButtonsContainer.appendChild(button);
+                    });
+
+                    // Show exams for the most recent year by default
+                    if (years.length > 0) {
+                        showExamsForYear(arabicData, years[0]);
+                        // Set the first button as active
+                        document.querySelector('.year-btn').classList.add('active');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading exam data:', error);
+                    document.getElementById('no-data').style.display = 'block';
+                    document.getElementById('no-data').innerHTML = `
+                        <h2>خطأ في تحميل البيانات</h2>
+                        <p>تعذر تحميل بيانات الامتحانات. يرجى المحاولة لاحقاً.</p>
+                    `;
+                });
+
+            // Function to show exams for a specific year
+            function showExamsForYear(arabicData, year) {
+                // Remove active class from all buttons
+                document.querySelectorAll('.year-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                
+                // Add active class to clicked button
+                event.target.classList.add('active');
+                
+                const examContainer = document.getElementById('exam-container');
+                examContainer.innerHTML = '';
+                
+                const yearData = arabicData[year];
+                if (!yearData || Object.keys(yearData).length === 0) {
+                    document.getElementById('no-data').style.display = 'block';
+                    return;
+                }
+                
+                document.getElementById('no-data').style.display = 'none';
+                
+                // Create exam cards for each term
+                for (const [term, termData] of Object.entries(yearData)) {
+                    const termName = getTermName(term);
+                    
+                    const examCard = document.createElement('div');
+                    examCard.className = 'subject-card';
+                    examCard.innerHTML = `
+                        <div class="exam-header">
+                            <h2>امتحانات ${year}</h2>
+                            <p class="exam-term">${termName}</p>
+                        </div>
+                        <div class="paper-section">
+                            <h3>أسئلة الامتحان</h3>
+                            <ul class="paper-list" id="questions-${year}-${term}">
+                                <!-- Questions will be populated by JavaScript -->
+                            </ul>
+                        </div>
+                        <div class="paper-section">
+                            <h3>الإجابات النموذجية</h3>
+                            <ul class="paper-list" id="answers-${year}-${term}">
+                                <!-- Answers will be populated by JavaScript -->
+                            </ul>
+                        </div>
+                    `;
+                    
+                    examContainer.appendChild(examCard);
+                    
+                    // Add questions
+                    const questionsList = document.getElementById(`questions-${year}-${term}`);
+                    if (termData.questions && termData.questions.length > 0) {
+                        termData.questions.forEach((question, index) => {
+                            const listItem = document.createElement('li');
+                            listItem.className = 'paper-item';
+                            listItem.innerHTML = `
+                                <a href="${question}" class="paper-link" target="_blank">
+                                    ورقة الأسئلة ${index + 1}
+                                </a>
+                            `;
+                            questionsList.appendChild(listItem);
+                        });
+                    } else {
+                        questionsList.innerHTML = '<li class="no-papers">لا توجد أسئلة متاحة</li>';
+                    }
+                    
+                    // Add answers
+                    const answersList = document.getElementById(`answers-${year}-${term}`);
+                    if (termData.answers && termData.answers.length > 0) {
+                        termData.answers.forEach((answer, index) => {
+                            const listItem = document.createElement('li');
+                            listItem.className = 'paper-item';
+                            listItem.innerHTML = `
+                                <a href="${answer}" class="paper-link" target="_blank">
+                                    ورقة الإجابة ${index + 1}
+                                </a>
+                            `;
+                            answersList.appendChild(listItem);
+                        });
+                    } else {
+                        answersList.innerHTML = '<li class="no-papers">لا توجد إجابات متاحة</li>';
+                    }
+                }
+            }
+            
+            // Helper function to get term name in Arabic
+            function getTermName(term) {
+                const terms = {
+                    'first': 'الدور الأول',
+                    'second': 'الدور الثاني',
+                    'third': 'الدور الثالث'
+                };
+                return terms[term] || term;
+            }
+        });
+    </script>
+
+    <style>
+        /* Additional styles for the subject page */
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        .year-filter {
+            background-color: var(--card-background);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow);
+        }
+
+        .year-filter h2 {
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+
+        .year-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .year-btn {
+            padding: 10px 20px;
+            background-color: #1e2a3a;
+            border: 1px solid #2c3e50;
+            border-radius: 6px;
+            color: var(--text-color);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .year-btn:hover, .year-btn.active {
+            background-color: var(--primary-color);
+        }
+
+        .exam-header {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #2c3e50;
+        }
+
+        .exam-header h2 {
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+
+        .exam-term {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .paper-section {
+            margin-bottom: 20px;
+        }
+
+        .paper-section h3 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+
+        .paper-list {
+            list-style-type: none;
+        }
+
+        .paper-item {
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #1e2a3a;
+            border-radius: 6px;
+        }
+
+        .paper-link {
+            color: var(--text-color);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .paper-link:hover {
+            color: var(--primary-color);
+        }
+
+        .paper-link::before {
+            content: "📄";
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-secondary);
+            background-color: var(--card-background);
+            border-radius: var(--border-radius);
+        }
+
+        .no-papers {
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        @media (max-width: 768px) {
+            .year-buttons {
+                justify-content: center;
+            }
+            
+            .year-btn {
+                padding: 8px 16px;
+            }
+        }
+    </style>
+</body>
+</html>
