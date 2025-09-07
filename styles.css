@@ -9,7 +9,6 @@
     --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     --hover-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
     --border-radius: 12px;
-    --icon-filter: invert(0); /* Default no filter for light mode */
 }
 
 [data-theme="dark"] {
@@ -21,7 +20,6 @@
     --text-secondary: #b1b1b1;
     --shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
     --hover-shadow: 0 10px 15px rgba(0, 0, 0, 0.5);
-    --icon-filter: invert(0); /* No filter for dark mode (white icons work well) */
 }
 
 /* Base Styles */
@@ -29,7 +27,7 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    transition: background-color 0.3s, color 0.3s, filter 0.3s;
+    transition: background-color 0.3s, color 0.3s;
 }
 
 body {
@@ -166,22 +164,9 @@ input:checked + .slider:before {
 }
 
 .card-icon img {
-    width: 70px; /* Fixed width */
-    height: 70px; /* Fixed height */
+    max-width: 100%;
+    max-height: 100%;
     object-fit: contain;
-    filter: var(--icon-filter); /* Apply filter based on theme */
-}
-
-/* Special handling for light mode - invert white icons to black */
-body:not([data-theme="dark"]) .card-icon img[src*="arabic.png"],
-body:not([data-theme="dark"]) .card-icon img[src*="english.png"],
-body:not([data-theme="dark"]) .card-icon img[src*="french.png"],
-body:not([data-theme="dark"]) .card-icon img[src*="math.png"],
-body:not([data-theme="dark"]) .card-icon img[src*="physics.png"],
-body:not([data-theme="dark"]) .card-icon img[src*="chemistry.png"],
-body:not([data-theme="dark"]) .card-icon img[src*="biology.png"],
-body:not([data-theme="dark"]) .card-icon img[src*="islamic.png"] {
-    filter: invert(1); /* Invert white icons to black in light mode */
 }
 
 .subject-card h2 {
@@ -218,11 +203,6 @@ footer {
         width: 70px;
         height: 70px;
     }
-    
-    .card-icon img {
-        width: 60px;
-        height: 60px;
-    }
 }
 
 @media (max-width: 480px) {
@@ -237,10 +217,5 @@ footer {
     .card-icon {
         width: 60px;
         height: 60px;
-    }
-    
-    .card-icon img {
-        width: 50px;
-        height: 50px;
     }
 }
