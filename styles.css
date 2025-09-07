@@ -155,8 +155,18 @@ input:checked + .slider:before {
 }
 
 .card-icon {
-    font-size: 3rem;
+    width: 80px;
+    height: 80px;
     margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.card-icon img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
 }
 
 .subject-card h2 {
@@ -188,6 +198,11 @@ footer {
     header h1 {
         font-size: 2rem;
     }
+    
+    .card-icon {
+        width: 70px;
+        height: 70px;
+    }
 }
 
 @media (max-width: 480px) {
@@ -197,5 +212,10 @@ footer {
     
     body {
         padding: 10px;
+    }
+    
+    .card-icon {
+        width: 60px;
+        height: 60px;
     }
 }
