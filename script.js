@@ -43,4 +43,21 @@ document.addEventListener('DOMContentLoaded', () => {
             card.style.transform = 'translateY(0)';
         }, 100 * index);
     });
+    
+    // Preload icons for better user experience
+    const iconPaths = [
+        'icons/arabic.png',
+        'icons/english.png',
+        'icons/french.png',
+        'icons/math.png',
+        'icons/physics.png',
+        'icons/chemistry.png',
+        'icons/biology.png',
+        'icons/islamic.png'
+    ];
+    
+    iconPaths.forEach(path => {
+        const img = new Image();
+        img.src = path;
+    });
 });
