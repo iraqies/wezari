@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الرياضيات - أرشيف أوراق الامتحانات</title>
+    <link rel="stylesheet" href="../styles.css">
+    <style>
+        /* Image viewer modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            overflow: auto;
+        }
+        
+        .modal-content {
+            display: block;
+            margin: auto;
+            max-width: 90%;
+            max-height: 80%;
+            margin-top: 5%;
+        }
+        
+        .close {
+            position: absolute;
+            top: 15px;
+            right: 35px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .close:hover {
+            color: #bbb;
+        }
+        
+        .paper-image {
+            width: 100%;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        
+        .paper-image:hover {
+            transform: scale(1.02);
+        }
+        
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 15px;
+        }
+        
+        .image-container {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+        
+        .image-container:hover {
+            box-shadow: var(--hover-shadow);
+        }
+        
+        .image-title {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 8px;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: var(--primary-color);
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .loading-text {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>أرشيف أوراق امتحانات الرياضيات الوزارية</h1>
+            <p>اختر السنة لعرض أوراق الامتحانات والإجابات الرسمية</p>
+            <a href="../index.html" class="back-link">← العودة إلى الصفحة الرئيسية</a>
+        </header>
+
+        <div class="year-filter">
+            <h2>اختر السنة:</h2>
+            <div class="year-buttons" id="year-buttons">
+                <!-- Years will be populated by JavaScript -->
+            </div>
+        </div>
+
+        <div id="exam-container" class="subjects-grid">
+            <!-- Exam papers will be populated by JavaScript -->
+        </div>
+
+        <div id="no-data" class="no-data" style="display: none;">
+            <h2>لا توجد بيانات متاحة لهذه السنة</h2>
+            <p>لم يتم إضافة أوراق امتحانات للرياضيات لهذه السنة بعد.</p>
+        </div>
+        
+        <div id="loading" class="no-data" style="display: none;">
+            <div class="loading-text">
+                <span class="loading-spinner"></span>
+                <span>جاري تحميل البيانات...</span>
+            </div>
+        </div>
+        
+        <footer>
+            <p>أرشيف أوراق الامتحانات الوزارية - جميع الحقوق محفوظة © 2025</p>
+        </footer>
+    </div>
+
+    <!-- Image Viewer Modal -->
+    <div id="imageModal" class="modal">
+        <span class="close">&times;</span>
+        <img class="modal-content" id="modalImage">
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const modal = document.getElementById("imageModal");
+            const modalImg = document.getElementById("modalImage");
+            const closeBtn = document.getElementsByClassName("close")[0];
+            const loadingElement = document.getElementById("loading");
+            
+            // Show loading indicator
+            loadingElement.style.display = 'block';
+            
+            // Load exam data from JSON file
+            fetch('../exam_papers.json')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    loadingElement.style.display = 'none';
+                    const mathData = data.math;
+                    if (!mathData || Object.keys(mathData).length === 0) {
+                        document.getElementById('no-data').style.display = 'block';
+                        return;
+                    }
+
+                    // Get all available years
+                    const years = Object.keys(mathData).sort((a, b) => b - a);
+                    
+                    // Create year buttons
+                    const yearButtonsContainer = document.getElementById('year-buttons');
+                    years.forEach(year => {
+                        const button = document.createElement('button');
+                        button.className = 'year-btn';
+                        button.textContent = year;
+                        button.addEventListener('click', () => showExamsForYear(mathData, year));
+                        yearButtonsContainer.appendChild(button);
+                    });
+
+                    // Show exams for the most recent year by default
+                    if (years.length > 0) {
+                        showExamsForYear(mathData, years[0]);
+                        // Set the first button as active
+                        document.querySelector('.year-btn').classList.add('active');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading exam data:', error);
+                    loadingElement.style.display = 'none';
+                    document.getElementById('no-data').style.display = 'block';
+                    document.getElementById('no-data').innerHTML = `
+                        <h2>خطأ في تحميل البيانات</h2>
+                        <p>تعذر تحميل بيانات الامتحانات. يرجى المحاولة لاحقاً.</p>
+                    `;
+                });
+
+            // Function to show exams for a specific year
+            function showExamsForYear(mathData, year) {
+                // Remove active class from all buttons
+                document.querySelectorAll('.year-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                
+                // Add active class to clicked button
+                event.target.classList.add('active');
+                
+                const examContainer = document.getElementById('exam-container');
+                examContainer.innerHTML = '';
+                
+                const yearData = mathData[year];
+                if (!yearData || Object.keys(yearData).length === 0) {
+                    document.getElementById('no-data').style.display = 'block';
+                    return;
+                }
+                
+                document.getElementById('no-data').style.display = 'none';
+                
+                // Create exam cards for each term
+                for (const [term, termData] of Object.entries(yearData)) {
+                    const termName = getTermName(term);
+                    
+                    const examCard = document.createElement('div');
+                    examCard.className = 'subject-card';
+                    examCard.innerHTML = `
+                        <div class="exam-header">
+                            <h2>امتحانات ${year}</h2>
+                            <p class="exam-term">${termName}</p>
+                        </div>
+                    `;
+                    
+                    // Add questions section if available
+                    if (termData.questions && termData.questions.length > 0) {
+                        const questionsSection = document.createElement('div');
+                        questionsSection.className = 'paper-section';
+                        questionsSection.innerHTML = `
+                            <h3>أسئلة الامتحان</h3>
+                            <div class="image-grid" id="questions-${year}-${term}">
+                                <!-- Questions will be populated by JavaScript -->
+                            </div>
+                        `;
+                        examCard.appendChild(questionsSection);
+                        
+                        // Add question images
+                        const questionsGrid = questionsSection.querySelector('.image-grid');
+                        termData.questions.forEach((question, index) => {
+                            const imageContainer = createImageContainer(question, `ورقة الأسئلة ${index + 1}`);
+                            questionsGrid.appendChild(imageContainer);
+                        });
+                    }
+                    
+                    // Add answers section if available
+                    if (termData.answers && termData.answers.length > 0) {
+                        const answersSection = document.createElement('div');
+                        answersSection.className = 'paper-section';
+                        answersSection.innerHTML = `
+                            <h3>الإجابات النموذجية</h3>
+                            <div class="image-grid" id="answers-${year}-${term}">
+                                <!-- Answers will be populated by JavaScript -->
+                            </div>
+                        `;
+                        examCard.appendChild(answersSection);
+                        
+                        // Add answer images
+                        const answersGrid = answersSection.querySelector('.image-grid');
+                        termData.answers.forEach((answer, index) => {
+                            const imageContainer = createImageContainer(answer, `ورقة الإجابة ${index + 1}`);
+                            answersGrid.appendChild(imageContainer);
+                        });
+                    }
+                    
+                    examContainer.appendChild(examCard);
+                }
+            }
+            
+            // Function to create an image container with click to enlarge functionality
+            function createImageContainer(imageUrl, title) {
+                const container = document.createElement('div');
+                container.className = 'image-container';
+                
+                const img = document.createElement('img');
+                img.src = imageUrl;
+                img.alt = title;
+                img.className = 'paper-image';
+                img.loading = 'lazy'; // Lazy loading for better performance
+                
+                // Add click to enlarge functionality
+                img.addEventListener('click', function() {
+                    modal.style.display = "block";
+                    modalImg.src = this.src;
+                });
+                
+                const titleElement = document.createElement('div');
+                titleElement.className = 'image-title';
+                titleElement.textContent = title;
+                
+                container.appendChild(img);
+                container.appendChild(titleElement);
+                
+                return container;
+            }
+            
+            // Close the modal when clicking on X
+            closeBtn.onclick = function() {
+                modal.style.display = "none";
+            }
+            
+            // Close the modal when clicking outside the image
+            window.onclick = function(event) {
+                if (event.target == modal) {
+                    modal.style.display = "none";
+                }
+            }
+            
+            // Helper function to get term name in Arabic
+            function getTermName(term) {
+                const terms = {
+                    'first': 'الدور الأول',
+                    'second': 'الدور الثاني',
+                    'third': 'الدور الثالث'
+                };
+                return terms[term] || term;
+            }
+        });
+    </script>
+</body>
+</html>
