@@ -220,77 +220,99 @@ footer {
     }
 }
 
-/* Additional styles for subject pages */
+/* ===== SUBJECT PAGE STYLES ===== */
+
+/* Back link */
 .back-link {
     display: inline-block;
     margin-top: 20px;
     color: var(--primary-color);
     text-decoration: none;
     font-weight: bold;
+    transition: color 0.3s;
 }
 
 .back-link:hover {
+    color: var(--secondary-color);
     text-decoration: underline;
 }
 
+/* Year filter */
 .year-filter {
     background-color: var(--card-background);
     border-radius: var(--border-radius);
-    padding: 20px;
+    padding: 25px;
     margin-bottom: 30px;
     box-shadow: var(--shadow);
 }
 
 .year-filter h2 {
     color: var(--primary-color);
-    margin-bottom: 15px;
+    margin-bottom: 20px;
+    text-align: center;
+    font-size: 1.5rem;
 }
 
 .year-buttons {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 12px;
+    justify-content: center;
 }
 
 .year-btn {
-    padding: 10px 20px;
+    padding: 12px 24px;
     background-color: #1e2a3a;
     border: 1px solid #2c3e50;
-    border-radius: 6px;
+    border-radius: var(--border-radius);
     color: var(--text-color);
     cursor: pointer;
     transition: all 0.3s;
+    font-size: 1rem;
+    font-weight: bold;
 }
 
-.year-btn:hover, .year-btn.active {
+.year-btn:hover {
     background-color: var(--primary-color);
+    transform: translateY(-2px);
 }
 
+.year-btn.active {
+    background-color: var(--primary-color);
+    box-shadow: var(--hover-shadow);
+}
+
+/* Exam header */
 .exam-header {
-    margin-bottom: 20px;
+    margin-bottom: 25px;
     padding-bottom: 15px;
     border-bottom: 1px solid #2c3e50;
+    text-align: center;
 }
 
 .exam-header h2 {
     color: var(--primary-color);
-    font-size: 1.5rem;
-    margin-bottom: 5px;
+    font-size: 1.6rem;
+    margin-bottom: 8px;
 }
 
 .exam-term {
     color: var(--text-secondary);
     font-size: 1.1rem;
+    font-weight: bold;
 }
 
+/* Paper sections */
 .paper-section {
-    margin-bottom: 20px;
+    margin-bottom: 25px;
 }
 
 .paper-section h3 {
     color: var(--primary-color);
-    margin-bottom: 10px;
-    font-size: 1.2rem;
+    margin-bottom: 15px;
+    font-size: 1.3rem;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #2c3e50;
 }
 
 .paper-list {
@@ -298,10 +320,16 @@ footer {
 }
 
 .paper-item {
-    margin-bottom: 10px;
-    padding: 10px;
+    margin-bottom: 12px;
+    padding: 12px;
     background-color: #1e2a3a;
-    border-radius: 6px;
+    border-radius: 8px;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.paper-item:hover {
+    transform: translateX(-5px);
+    box-shadow: var(--hover-shadow);
 }
 
 .paper-link {
@@ -309,7 +337,9 @@ footer {
     text-decoration: none;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
+    font-weight: 500;
+    transition: color 0.3s;
 }
 
 .paper-link:hover {
@@ -318,27 +348,75 @@ footer {
 
 .paper-link::before {
     content: "📄";
+    font-size: 1.2rem;
 }
 
+/* No data message */
 .no-data {
     text-align: center;
-    padding: 40px;
+    padding: 50px 30px;
     color: var(--text-secondary);
     background-color: var(--card-background);
     border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    margin: 30px 0;
+}
+
+.no-data h2 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
 }
 
 .no-papers {
     color: var(--text-secondary);
     font-style: italic;
+    text-align: center;
+    padding: 15px;
 }
 
+/* Responsive design for subject pages */
 @media (max-width: 768px) {
     .year-buttons {
         justify-content: center;
     }
     
     .year-btn {
-        padding: 8px 16px;
+        padding: 10px 18px;
+        font-size: 0.9rem;
+    }
+    
+    .exam-header h2 {
+        font-size: 1.4rem;
+    }
+    
+    .paper-section h3 {
+        font-size: 1.2rem;
+    }
+    
+    .paper-item {
+        padding: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .year-btn {
+        padding: 8px 14px;
+        font-size: 0.85rem;
+    }
+    
+    .exam-header h2 {
+        font-size: 1.3rem;
+    }
+    
+    .paper-link {
+        font-size: 0.9rem;
+    }
+    
+    .no-data {
+        padding: 30px 20px;
+    }
+    
+    .no-data h2 {
+        font-size: 1.3rem;
     }
 }
